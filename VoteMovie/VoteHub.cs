@@ -10,11 +10,23 @@ namespace VoteMovie
     {
         public void Vote(int id)
         {
-            var movie = MvcApplication.Movies.First(x => x.Id == id);
+            var movie = Repository.Movies.First(x => x.Id == id);
             movie.VoteCount++;
 
+            var positions = Repository.Movies
+                            .OrderByDescending(x => x.VoteCount)
+                            .Select(x => new MoviePosition { Id = x.Id, VoteCount = x.VoteCount });
+
             // Call the broadcastMessage method to update clients.
-            Clients.All.broadcastMessage(id, movie.VoteCount);
+            Clients.All.broadcastMessage(positions);
+        }
+
+        public class MoviePosition
+        {
+            public int Id { get; set; }
+            public int VoteCount { get; set; }
         }
     }
+
+    
 }
